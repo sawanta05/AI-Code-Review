@@ -1,13 +1,22 @@
-from flask import Flask
+from flask import Flask, request, jsonify
 
-# Create Flask application
 app = Flask(__name__)
 
-# Home route
 @app.route("/")
 def home():
     return "AI Code Review Backend Running"
 
-# Run server
+@app.route("/review", methods=["POST"])
+def review_code():
+
+    data = request.get_json()
+
+    code = data.get("code")
+
+    return jsonify({
+        "message": "Code received successfully!",
+        "received_code": code
+    })
+
 if __name__ == "__main__":
     app.run(debug=True)
