@@ -4,7 +4,19 @@ import os
 import sys
 import re
 
+from dotenv import load_dotenv
+from google import genai
+
 app = Flask(__name__)
+
+from pathlib import Path
+
+load_dotenv(Path(__file__).parent / ".env")
+print("Gemini Key:", os.getenv("GEMINI_API_KEY"))
+
+client = genai.Client(
+    api_key=os.getenv("GEMINI_API_KEY")
+)
 
 @app.route("/")
 def home():
@@ -65,9 +77,36 @@ def parse_pylint_output(output):
         "issues": issues
     }
 
+
+def get_ai_review(code):
+
+    try:
+
+        response = client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=f"""
+You are an expert Python code reviewer.
+
+Review the following Python code and provide:
+1. Bugs (if any)
+2. Code quality improvements
+3. Best practices
+4. Suggestions
+
+Code:
+{code}
+"""
+        )
+
+        return response.text
+
+    except Exception as e:
+        print("Gemini Error:", e)
+        return str(e)
+    
 @app.route("/review", methods=["POST"])
 def review_code():
-
+    
     data = request.get_json()
 
     if not data:
@@ -103,6 +142,10 @@ def review_code():
     print(result.stderr)
     
     parsed_review = parse_pylint_output(result.stdout)
+
+    ai_review = get_ai_review(code)
+
+    parsed_review["ai_review"] = ai_review
 
     return jsonify(parsed_review)
 
