@@ -1,3 +1,5 @@
+from datetime import datetime
+import time
 from flask import Flask, request, jsonify
 import subprocess
 import os
@@ -87,13 +89,23 @@ def get_ai_review(code):
             contents=f"""
 You are an expert Python code reviewer.
 
-Review the following Python code and provide:
-1. Bugs (if any)
-2. Code quality improvements
-3. Best practices
-4. Suggestions
+Analyze the following Python code.
 
-Code:
+Respond in exactly this format:
+
+## Overall Feedback
+
+## Bugs
+
+## Code Quality
+
+## Best Practices
+
+## Optimized Code
+
+Keep your answers concise and beginner-friendly.
+
+Python Code:
 {code}
 """
         )
@@ -106,7 +118,9 @@ Code:
     
 @app.route("/review", methods=["POST"])
 def review_code():
-    
+
+    start_time = time.time()
+
     data = request.get_json()
 
     if not data:
@@ -146,6 +160,10 @@ def review_code():
     ai_review = get_ai_review(code)
 
     parsed_review["ai_review"] = ai_review
+
+    parsed_review["reviewed_at"] = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
+
+    parsed_review["response_time"] = round(time.time() - start_time, 2)
 
     return jsonify(parsed_review)
 
