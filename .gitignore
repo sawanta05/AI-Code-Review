@@ -33,3 +33,7 @@ backend/temp_code.py
 # Python cache
 __pycache__/
 *.pyc
+
+.env
+temp/
+__pycache__/

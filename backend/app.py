@@ -1,5 +1,6 @@
 from datetime import datetime
 import time
+from flask_cors import CORS
 from flask import Flask, request, jsonify
 import subprocess
 import os
@@ -10,6 +11,7 @@ from dotenv import load_dotenv
 from google import genai
 
 app = Flask(__name__)
+CORS(app)
 
 from pathlib import Path
 
@@ -122,6 +124,8 @@ def review_code():
     start_time = time.time()
 
     data = request.get_json()
+
+    print("Received JSON:", data)
 
     if not data:
         return jsonify({"error": "No JSON received"}), 400
